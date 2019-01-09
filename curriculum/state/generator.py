@@ -79,26 +79,7 @@ class StateGAN(StateGenerator):
         )
         self.state_size = state_size
         self.evaluater_size = evaluater_size
-        self.state_center = np.array(state_center) if state_center is not None else np.zeros(state_size)
-        if state_range is not None:
-            self.state_range = state_range
-            self.state_bounds = np.vstack([-self.state_range * np.ones(self.state_size), self.state_range * np.ones(self.state_size)])
-        elif state_bounds is not None:
-            self.state_bounds = np.array(state_bounds)
-            self.state_range = self.state_bounds[1] - self.state_bounds[0]
         self.state_noise_level = state_noise_level
-        print('state_center is : ', self.state_center, 'state_range: ', self.state_range,
-              'state_bounds: ', self.state_bounds)
-
-    def pretrain_uniform(self, size=10000, report=None, *args, **kwargs):
-        """
-        :param size: number of uniformly sampled states (that we will try to fit as output of the GAN)
-        :param outer_iters: of the GAN
-        """
-        states = np.random.uniform(
-            self.state_center + self.state_bounds[0], self.state_center + self.state_bounds[1], size=(size, self.state_size)
-        )
-        return self.pretrain(states, *args, **kwargs)
 
     def pretrain(self, states, outer_iters=500, generator_iters=None, discriminator_iters=None):
         """
@@ -111,26 +92,13 @@ class StateGAN(StateGenerator):
             states, labels, outer_iters, generator_iters, discriminator_iters
         )
 
-    def _add_noise_to_states(self, states):
-        noise = np.random.randn(*states.shape) * self.state_noise_level
-        states += noise
-        return np.clip(states, self.state_center + self.state_bounds[0], self.state_center + self.state_bounds[1])
-
     def sample_states(self, size):  # un-normalizes the states
-        normalized_states, noise = self.gan.sample_generator(size)
-        states = self.state_center + normalized_states * (self.state_bounds[1] - self.state_bounds[0])
-        return states, noise
-
-    def sample_states_with_noise(self, size):
-        states, noise = self.sample_states(size)
-        states = self._add_noise_to_states(states)
-        return states, noise
+        return self.gan.sample_generator(size)
 
     @overrides
     def train(self, states, labels, outer_iters, generator_iters=None, discriminator_iters=None):
-        normalized_states = (states - self.state_center) / (self.state_bounds[1] - self.state_bounds[0])
         return self.gan.train(
-            normalized_states, labels, outer_iters, generator_iters, discriminator_iters
+            states, labels, outer_iters, generator_iters, discriminator_iters
         )
 
     def discriminator_predict(self, states):
