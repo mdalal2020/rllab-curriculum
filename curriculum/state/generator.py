@@ -1,8 +1,6 @@
 import numpy as np
 from rllab.misc.overrides import overrides
 from curriculum.gan.gan import FCGAN
-from curriculum.state.utils import sample_matrix_row
-from curriculum.logging.visualization import plot_labeled_states
 
 
 class StateGenerator(object):

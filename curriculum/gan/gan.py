@@ -196,7 +196,6 @@ class FCGAN(object):
                 sample_X = next(batch_feed_X)
                 sample_Y = next(batch_feed_Y)
                 generated_X, random_noise = self.sample_generator(batch_size)
-                
                 train_X = np.vstack([sample_X, generated_X])
                 train_Y = np.vstack([sample_Y, generated_Y])
                 
