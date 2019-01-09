@@ -78,7 +78,6 @@ class StateGAN(StateGenerator):
         )
         self.state_size = state_size
         self.evaluater_size = evaluater_size
-        self.state_noise_level = state_noise_level
 
     def pretrain(self, states, outer_iters=500, generator_iters=None, discriminator_iters=None):
         """
